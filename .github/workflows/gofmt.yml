@@ -5,7 +5,17 @@ jobs:
     name: Go fmt project
     runs-on: ubuntu-latest
     steps:
-      - name: check out
-        uses: actions/checkout@v3
-      - name: go fmt project
-        uses: Jerome1337/gofmt-action@v1.0.4
+      - name: Check out
+        uses: actions/checkout@v4
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24'
+      - name: Run gofmt
+        run: |
+          unformatted=$(gofmt -l .)
+          if [ -n "$unformatted" ]; then
+            echo "The following files are not correctly formatted:"
+            echo "$unformatted"
+            exit 1
+          fi
