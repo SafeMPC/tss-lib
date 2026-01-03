@@ -34,11 +34,11 @@ func TestEd25519ByteOrder(t *testing.T) {
 	t.Logf("\n📊 Byte Order Test:")
 	t.Logf("big.Int value: 0x%x", testValue)
 	t.Logf("big.Int.Bytes() (big-endian): %x", testBytes)
-	
+
 	// If big.Int.Bytes() is big-endian, then:
 	// 0x01020304 should be represented as [01 02 03 04]
 	// If it's little-endian, it should be [04 03 02 01]
-	
+
 	if len(testBytes) > 0 {
 		if testBytes[0] == 0x01 {
 			t.Logf("✅ big.Int.Bytes() uses BIG-ENDIAN (most significant byte first)")

@@ -24,7 +24,7 @@ func TestSignatureToStandardEd25519(t *testing.T) {
 	// R part (first 32 bytes) should be reversed
 	rLE := testSigLE[:32]
 	rBE := standardSig[:32]
-	
+
 	// Check that bytes are reversed
 	reversed := true
 	for i := 0; i < 32; i++ {
@@ -38,7 +38,7 @@ func TestSignatureToStandardEd25519(t *testing.T) {
 	// S part (last 32 bytes) should be reversed
 	sLE := testSigLE[32:]
 	sBE := standardSig[32:]
-	
+
 	reversed = true
 	for i := 0; i < 32; i++ {
 		if sLE[i] != sBE[31-i] {

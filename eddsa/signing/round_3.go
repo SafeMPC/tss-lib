@@ -78,8 +78,8 @@ func (round *round3) Start() *tss.Error {
 	// NOTE: For internal consistency with edwards25519 library, we use little-endian here
 	// The final signature output will be converted to big-endian in finalize.go
 	var encodedR [32]byte
-	R.ToBytes(&encodedR)  // edwards25519 outputs little-endian
-	encodedPubKey := ecPointToEncodedBytes(round.key.EDDSAPub.X(), round.key.EDDSAPub.Y())  // little-endian for internal use
+	R.ToBytes(&encodedR) // edwards25519 outputs little-endian
+	encodedPubKey := ecPointToEncodedBytes(round.key.EDDSAPub.X(), round.key.EDDSAPub.Y()) // little-endian for internal use
 
 	// h = SHA-512(R || A || M) - Standard Ed25519 (RFC 8032)
 	// IMPORTANT: round.temp.m should contain the ORIGINAL message bytes (not pre-hashed)
