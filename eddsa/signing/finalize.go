@@ -49,7 +49,7 @@ func (round *finalization) Start() *tss.Error {
 	if round.temp.fullBytesLen == 0 {
 		round.data.M = round.temp.m.Bytes()
 	} else {
-		var mBytes = make([]byte, round.temp.fullBytesLen)
+		mBytes := make([]byte, round.temp.fullBytesLen)
 		round.temp.m.FillBytes(mBytes)
 		round.data.M = mBytes
 	}
