@@ -135,6 +135,7 @@ This fork prioritizes **compatibility over cutting-edge security** by isolating 
 - 🔐 **btcd**: v0.23.4 → **v0.25.0** (latest stable)
 - 🔐 **btcec/v2**: v2.3.2 → **v2.3.6** (latest stable)
 - 🔐 **golang.org/x/crypto**: v0.13.0 → **v0.45.0** (latest stable)
+- 🔐 **google.golang.org/protobuf**: v1.31.0 → **v1.36.11** (security fix for GO-2024-2611)
 - 🧪 **testify**: v1.8.4 → **v1.11.1** (latest stable)
 - 🔵 **ed25519**: Optimized SafeMPC fork (provides necessary extended APIs)
 - 🐹 **Go Version**: 1.16 → **1.24.0** (modern Go version)
@@ -147,6 +148,9 @@ This fork prioritizes **compatibility over cutting-edge security** by isolating 
 
 **✅ Testing and Verification Results:**
 - 🎯 **17 Packages**: All tests pass with no failures
+- 📊 **Test Coverage**: Improved from 36.8% to 67.6% for common package
+- 🎯 **Critical Functions**: >90% coverage (SHA512_256: 91.3%, SHA512_256i: 92.0%, SHA512_256i_TAGGED: 90.0%, ModInt: 100.0%)
+- 🧪 **Fuzz Testing**: Comprehensive fuzz tests for hash functions, cryptographic utilities, and random number generation
 - 🔨 **Complete Build**: `go build ./...` succeeds
 - 🔄 **Backward Compatibility**: 100% API compatibility guaranteed
 - 🔐 **Cryptographic Verification**: All cryptographic functions work correctly
@@ -156,6 +160,18 @@ This fork prioritizes **compatibility over cutting-edge security** by isolating 
 - 🚫 **Zero Conflicts**: Completely eliminates version conflict risks
 - 🔮 **Future-oriented**: Modern dependency management architecture
 - 📈 **Active Maintenance**: Continuous updates and security maintenance
+
+## Security and Compatibility Documentation
+
+### Security Audit Report
+- [Security Audit Report](SECURITY_AUDIT_REPORT.md) - Comprehensive security audit including dynamic testing, fuzz testing, and cryptographic analysis
+
+### MPC Wallet Compatibility
+- [MPC Wallet Compatibility Report](MPC_WALLET_COMPATIBILITY_REPORT.md) - Verification of compatibility with MPC wallet application scenarios
+
+### Ed25519 Compatibility
+- [Ed25519 Verification Status](ED25519_VERIFICATION_STATUS.md) - Standard Ed25519 compatibility verification
+- [FROST Ed25519 Compatibility Analysis](frost-ed25519-compatibility-analysis.md) - Detailed compatibility analysis
 
 ## Fundamentals
 ECDSA is widely used in cryptocurrencies such as Bitcoin, Ethereum (secp256k1 curve), NEO (NIST P-256 curve), and others.
