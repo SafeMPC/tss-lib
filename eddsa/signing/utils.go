@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"io"
 	"math/big"
+	"unsafe"
 
 	"github.com/agl/ed25519/edwards25519"
 
@@ -150,7 +151,30 @@ func addExtendedElements(p, q edwards25519.ExtendedGroupElement) edwards25519.Ex
 	var r edwards25519.CompletedGroupElement
 	var qCached edwards25519.CachedGroupElement
 	q.ToCached(&qCached)
-	edwards25519.GeAdd(&r, &p, &qCached)
+
+	// Implementation of geAdd (internal function from edwards25519 package)
+	// Access unexported fields using unsafe.Pointer
+	// CachedGroupElement structure: {yPlusX, yMinusX, Z, T2d FieldElement}
+	// FieldElement is [10]int32, so each field is 40 bytes
+	qCachedPtr := unsafe.Pointer(&qCached)
+	yPlusX := (*edwards25519.FieldElement)(unsafe.Pointer(uintptr(qCachedPtr) + 0*40))
+	yMinusX := (*edwards25519.FieldElement)(unsafe.Pointer(uintptr(qCachedPtr) + 1*40))
+	z := (*edwards25519.FieldElement)(unsafe.Pointer(uintptr(qCachedPtr) + 2*40))
+	t2d := (*edwards25519.FieldElement)(unsafe.Pointer(uintptr(qCachedPtr) + 3*40))
+
+	var t0 edwards25519.FieldElement
+	edwards25519.FeAdd(&r.X, &p.Y, &p.X)
+	edwards25519.FeSub(&r.Y, &p.Y, &p.X)
+	edwards25519.FeMul(&r.Z, &r.X, yPlusX)
+	edwards25519.FeMul(&r.Y, &r.Y, yMinusX)
+	edwards25519.FeMul(&r.T, t2d, &p.T)
+	edwards25519.FeMul(&r.X, &p.Z, z)
+	edwards25519.FeAdd(&t0, &r.X, &r.X)
+	edwards25519.FeSub(&r.X, &r.Z, &r.Y)
+	edwards25519.FeAdd(&r.Y, &r.Z, &r.Y)
+	edwards25519.FeAdd(&r.Z, &t0, &r.T)
+	edwards25519.FeSub(&r.T, &t0, &r.T)
+
 	var result edwards25519.ExtendedGroupElement
 	r.ToExtended(&result)
 	return result
