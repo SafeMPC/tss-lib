@@ -12,7 +12,6 @@ import (
 
 	"github.com/agl/ed25519/edwards25519"
 	"github.com/pkg/errors"
-
 	"github.com/SafeMPC/tss-lib/common"
 	"github.com/SafeMPC/tss-lib/crypto"
 	"github.com/SafeMPC/tss-lib/crypto/commitments"
