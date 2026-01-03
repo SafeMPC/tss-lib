@@ -70,4 +70,3 @@ func DiagnoseSignatureFormat(
 		fmt.Println("   3. Public key encoding format differs")
 	}
 }
-

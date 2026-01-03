@@ -69,4 +69,3 @@ func TestSignatureToStandardEd25519_InvalidLength(t *testing.T) {
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "signature must be 64 bytes")
 }
-

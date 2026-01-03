@@ -85,4 +85,3 @@ func TestTssLibSignatureByteOrder(t *testing.T) {
 	t.Logf("rLE vs rBE: %v", *rLE != *rBE)
 	t.Logf("rBE vs rBigIntBytes (padded): need to check")
 }
-
