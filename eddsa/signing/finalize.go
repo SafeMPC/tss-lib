@@ -12,8 +12,8 @@ import (
 	"math/big"
 
 	"github.com/agl/ed25519/edwards25519"
-	"github.com/SafeMPC/tss-lib/tss"
 	"github.com/decred/dcrd/dcrec/edwards/v2"
+	"github.com/SafeMPC/tss-lib/tss"
 )
 
 func (round *finalization) Start() *tss.Error {

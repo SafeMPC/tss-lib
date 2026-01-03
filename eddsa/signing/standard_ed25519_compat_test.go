@@ -5,10 +5,10 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/SafeMPC/tss-lib/common"
 	"github.com/SafeMPC/tss-lib/eddsa/keygen"
 	"github.com/SafeMPC/tss-lib/tss"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestStandardEd25519Compatibility(t *testing.T) {
