@@ -1,0 +1,150 @@
+// Copyright © 2026 SafeMPC
+//
+// This file is part of SafeMPC. The full SafeMPC copyright notice, including
+// terms governing use, modification, and redistribution, is contained in the
+// file LICENSE at the root of the source code distribution tree.
+
+package signing
+
+import (
+	"crypto/sha512"
+	"math/big"
+
+	"github.com/agl/ed25519/edwards25519"
+	"github.com/SafeMPC/tss-lib/common"
+	"github.com/pkg/errors"
+
+	"github.com/SafeMPC/tss-lib/crypto"
+	"github.com/SafeMPC/tss-lib/crypto/commitments"
+	"github.com/SafeMPC/tss-lib/tss"
+)
+
+func (round *round3) Start() *tss.Error {
+	if round.started {
+		return round.WrapError(errors.New("round already started"))
+	}
+
+	round.number = 3
+	round.started = true
+	round.resetOK()
+
+	// 1. init R
+	var R edwards25519.ExtendedGroupElement
+	riBytes := bigIntToEncodedBytes(round.temp.ri)
+	edwards25519.GeScalarMultBase(&R, riBytes)
+
+	// 2-6. compute R
+	i := round.PartyID().Index
+	for j, Pj := range round.Parties().IDs() {
+		if j == i {
+			continue
+		}
+
+		ContextJ := common.AppendBigIntToBytesSlice(round.temp.ssid, big.NewInt(int64(j)))
+		msg := round.temp.signRound2Messages[j]
+		r2msg := msg.Content().(*SignRound2Message)
+		cmtDeCmt := commitments.HashCommitDecommit{C: round.temp.cjs[j], D: r2msg.UnmarshalDeCommitment()}
+		ok, coordinates := cmtDeCmt.DeCommit()
+		if !ok {
+			return round.WrapError(errors.New("de-commitment verify failed"))
+		}
+		if len(coordinates) != 2 {
+			return round.WrapError(errors.New("length of de-commitment should be 2"))
+		}
+
+		Rj, err := crypto.NewECPoint(round.Params().EC(), coordinates[0], coordinates[1])
+		Rj = Rj.EightInvEight()
+		if err != nil {
+			return round.WrapError(errors.Wrapf(err, "NewECPoint(Rj)"), Pj)
+		}
+		proof, err := r2msg.UnmarshalZKProof(round.Params().EC())
+		if err != nil {
+			return round.WrapError(errors.New("failed to unmarshal Rj proof"), Pj)
+		}
+		ok = proof.Verify(ContextJ, Rj)
+		if !ok {
+			return round.WrapError(errors.New("failed to prove Rj"), Pj)
+		}
+
+		extendedRj := ecPointToExtendedElement(round.Params().EC(), Rj.X(), Rj.Y(), round.Rand())
+		R = addExtendedElements(R, extendedRj)
+	}
+
+	// 7. compute lambda (challenge)
+	// Following RFC 8032 Ed25519 standard:
+	//   h = SHA-512(R || A || M)
+	//   where R is the commitment point, A is the public key, M is the message
+	// This is the standard Ed25519 challenge computation, NOT a pre-hash of the message
+	// NOTE: For internal consistency with edwards25519 library, we use little-endian here
+	// The final signature output will be converted to big-endian in finalize.go
+	var encodedR [32]byte
+	R.ToBytes(&encodedR)  // edwards25519 outputs little-endian
+	encodedPubKey := ecPointToEncodedBytes(round.key.EDDSAPub.X(), round.key.EDDSAPub.Y())  // little-endian for internal use
+
+	// h = SHA-512(R || A || M) - Standard Ed25519 (RFC 8032)
+	// IMPORTANT: round.temp.m should contain the ORIGINAL message bytes (not pre-hashed)
+	// The caller should pass original message bytes converted to *big.Int
+	// NOTE: Using little-endian for R and A here for internal consistency
+	// Final signature will be converted to big-endian format in finalize.go
+	h := sha512.New()
+	h.Reset()
+	h.Write(encodedR[:])      // R: commitment point (32 bytes, little-endian for internal use)
+	h.Write(encodedPubKey[:]) // A: public key (32 bytes, little-endian for internal use)
+
+	// M: original message bytes (NOT pre-hashed)
+	var messageBytes []byte
+	if round.temp.fullBytesLen == 0 {
+		messageBytes = round.temp.m.Bytes()
+	} else {
+		messageBytes = make([]byte, round.temp.fullBytesLen)
+		round.temp.m.FillBytes(messageBytes)
+	}
+	h.Write(messageBytes)  // M: original message
+
+	var lambda [64]byte
+	h.Sum(lambda[:0])
+	var lambdaReduced [32]byte
+	edwards25519.ScReduce(&lambdaReduced, &lambda)
+
+	// 8. compute si
+	var localS [32]byte
+	edwards25519.ScMulAdd(&localS, &lambdaReduced, bigIntToEncodedBytes(round.temp.wi), riBytes)
+
+	// 9. store r3 message pieces
+	round.temp.si = &localS
+	round.temp.r = encodedBytesToBigInt(&encodedR)
+
+	// 10. broadcast si to other parties
+	r3msg := NewSignRound3Message(round.PartyID(), encodedBytesToBigInt(&localS))
+	round.temp.signRound3Messages[round.PartyID().Index] = r3msg
+	round.out <- r3msg
+
+	return nil
+}
+
+func (round *round3) Update() (bool, *tss.Error) {
+	ret := true
+	for j, msg := range round.temp.signRound3Messages {
+		if round.ok[j] {
+			continue
+		}
+		if msg == nil || !round.CanAccept(msg) {
+			ret = false
+			continue
+		}
+		round.ok[j] = true
+	}
+	return ret, nil
+}
+
+func (round *round3) CanAccept(msg tss.ParsedMessage) bool {
+	if _, ok := msg.Content().(*SignRound3Message); ok {
+		return msg.IsBroadcast()
+	}
+	return false
+}
+
+func (round *round3) NextRound() tss.Round {
+	round.started = false
+	return &finalization{round}
+}
