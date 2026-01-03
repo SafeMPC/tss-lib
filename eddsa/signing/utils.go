@@ -48,6 +48,18 @@ func bigIntToEncodedBytes(a *big.Int) *[32]byte {
 	return s
 }
 
+// copyBytes copies a byte slice to a fixed-size 32-byte array.
+// 
+// Behavior:
+//   - If aB is nil, returns nil.
+//   - If aB is shorter than 32 bytes, pads with leading zeros to make it 32 bytes.
+//   - If aB is exactly 32 bytes, copies all bytes.
+//   - If aB is longer than 32 bytes, copies only the first 32 bytes (truncates).
+//     This truncation behavior is intentional and documented.
+//
+// Note: The input slice aB is modified during padding (if needed), but this
+// modification only affects the local copy used for padding, not the original
+// slice passed by the caller.
 func copyBytes(aB []byte) *[32]byte {
 	if aB == nil {
 		return nil
@@ -64,6 +76,7 @@ func copyBytes(aB []byte) *[32]byte {
 		}
 	}
 
+	// Copy first 32 bytes (truncates if aB is longer than 32 bytes)
 	for i := 0; i < 32; i++ {
 		s[i] = aB[i]
 	}

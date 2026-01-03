@@ -1,6 +1,8 @@
 build
 vendor
 .DS_Store
+.cursor
+singing.test
 
 # Binaries for programs and plugins
 *.exe
@@ -14,6 +16,13 @@ vendor
 
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
+coverage*.out
+final_coverage.out
+
+# Duplicate directories (accidentally created)
+* 2/
+test/* 2/
+eddsa/signing 2/
 
 # IDE
 .idea/*
@@ -21,4 +30,9 @@ vendor
 !.idea/codeStyles/
 *.swp
 .vscode/*.json
+
+# Temporary files
+*.tmp
+*.bak
+*~
 

@@ -53,6 +53,9 @@ func (round *round1) Start() *tss.Error {
 	round.save.Ks = ids
 
 	// security: the original u_i may be discarded
+	// Note: Assigning to zero helps indicate intent to clear the secret.
+	// Go's garbage collector will eventually reclaim the memory, but we
+	// cannot guarantee immediate clearing due to Go's memory management model.
 	ui = zero // clears the secret data from memory
 	_ = ui    // silences a linter warning
 
