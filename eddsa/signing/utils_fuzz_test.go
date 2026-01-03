@@ -19,7 +19,7 @@ func FuzzBigIntToEncodedBytes(f *testing.F) {
 	f.Add(int64(123456789))
 	f.Add(int64(-1))
 	f.Add(int64(1 << 31))
-	f.Add(int64(1<<62))
+	f.Add(int64(1 << 62))
 	f.Add(int64(0x7FFFFFFFFFFFFFFF))
 
 	f.Fuzz(func(t *testing.T, val int64) {
@@ -61,7 +61,7 @@ func FuzzEncodedBytesToBigInt(f *testing.F) {
 		}
 		var arr [32]byte
 		copy(arr[:], data)
-		
+
 		result := encodedBytesToBigInt(&arr)
 		if result == nil {
 			t.Errorf("encodedBytesToBigInt returned nil")
@@ -146,4 +146,3 @@ func FuzzSignatureToStandardEd25519(f *testing.F) {
 		}
 	})
 }
-

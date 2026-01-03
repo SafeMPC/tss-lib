@@ -49,7 +49,7 @@ func bigIntToEncodedBytes(a *big.Int) *[32]byte {
 }
 
 // copyBytes copies a byte slice to a fixed-size 32-byte array.
-// 
+//
 // Behavior:
 //   - If aB is nil, returns nil.
 //   - If aB is shorter than 32 bytes, pads with leading zeros to make it 32 bytes.

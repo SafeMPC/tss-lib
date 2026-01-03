@@ -235,22 +235,21 @@ func TestSHA512_256i_Consistency(t *testing.T) {
 func TestSHA512_256_StandardCompatibility(t *testing.T) {
 	// Test that our implementation produces same result as standard SHA-512/256
 	input := []byte("test input")
-	
+
 	// Standard SHA-512/256
 	standardHash := sha512.Sum512_256(input)
-	
+
 	// Our implementation
 	ourHash := SHA512_256(input)
-	
+
 	if len(ourHash) != 32 {
 		t.Errorf("Our hash should be 32 bytes")
 		return
 	}
-	
+
 	// Compare first 32 bytes (our implementation uses domain separation, so may differ)
 	// This test mainly ensures our implementation doesn't crash and produces valid output
 	if len(standardHash) != len(ourHash) {
 		t.Errorf("Hash lengths should match")
 	}
 }
-

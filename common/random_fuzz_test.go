@@ -54,7 +54,7 @@ func FuzzGetRandomPositiveInt(f *testing.F) {
 	f.Add(int64(100))
 	f.Add(int64(1000))
 	f.Add(int64(1 << 31))
-	f.Add(int64(1<<62))
+	f.Add(int64(1 << 62))
 
 	f.Fuzz(func(t *testing.T, boundVal int64) {
 		if boundVal <= 0 {
@@ -74,4 +74,3 @@ func FuzzGetRandomPositiveInt(f *testing.F) {
 		}
 	})
 }
-

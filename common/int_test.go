@@ -343,4 +343,3 @@ func TestAppendBigIntToBytesSlice(t *testing.T) {
 		})
 	}
 }
-

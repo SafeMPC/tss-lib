@@ -54,7 +54,7 @@ func FuzzSHA512_256i(f *testing.F) {
 	f.Add(int64(123456789))
 	f.Add(int64(-1))
 	f.Add(int64(1 << 31))
-	f.Add(int64(1<<62))
+	f.Add(int64(1 << 62))
 
 	f.Fuzz(func(t *testing.T, val int64) {
 		bi := big.NewInt(val)
@@ -88,4 +88,3 @@ func FuzzSHA512_256i_TAGGED(f *testing.F) {
 		}
 	})
 }
-
